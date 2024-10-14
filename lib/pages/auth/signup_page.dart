@@ -1,173 +1,164 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'login_page.dart';
+import '../../widgets/auth/auth_button.dart';
+import '../../widgets/auth/auth_text_button.dart';
+import '../../widgets/header_text.dart';
+import '../../widgets/auth/social_icons_row.dart';
 
-class SignupPage extends StatelessWidget {
+class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
+
+  @override
+  _SignupPageState createState() => _SignupPageState();
+}
+
+class _SignupPageState extends State<SignupPage> {
+  // Controllers to get the user's input
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  String? _selectedGender; // Variable to hold the selected gender
+
+  @override
+  void dispose() {
+    // Dispose controllers when the widget is removed from the widget tree
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Center vertically
-          children: [
-            const HeaderText(title: 'Create Account'),
-            const SizedBox(height: 16),
-            const TextInput(text: 'Full Name'),
-            const TextInput(text: 'Email'),
-            const TextInput(text: 'Password'),
-            const TextInput(text: 'Confirm Password'),
-            const SizedBox(height: 20),
-            AuthButton(
-              text: 'Sign Up',
-              onPressed: () {
-                // Handle sign up logic here
-              },
-            ),
-            const SizedBox(height: 16),
-            AuthTextButton(
-              text: 'Already have an account? Login',
-              onPressed: () {
-                Navigator.of(context).pop(); // Navigate back to login
-              },
-            ),
-            const SizedBox(height: 16),
-            const Text('Or sign up with'),
-            const SizedBox(height: 16),
-            const SocialIconsRow(),
-          ],
-        ),
-      ),
-    );
-  }
-}
+        child: SingleChildScrollView( // Allow scrolling
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const HeaderText(),
+              const SizedBox(height: 16),
+              // Name input field
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Name',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Email input field
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: TextField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Password input field
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Gender selection
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: DropdownButtonFormField<String>(
+                  value: _selectedGender,
+                  hint: const Text('Select Gender'),
+                  items: <String>['Male', 'Female', 'Other']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedGender = newValue;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Sign-up button
+              AuthButton(
+                text: 'Sign Up',
+                onPressed: () async {
+                  // Capture user input
+                  final name = _nameController.text;
+                  final email = _emailController.text;
+                  final password = _passwordController.text;
 
-class HeaderText extends StatelessWidget {
-  final String title;
+                  if (name.isEmpty || email.isEmpty || password.isEmpty || _selectedGender == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please fill all fields')),
+                    );
+                    return;
+                  }
 
-  const HeaderText({super.key, required this.title});
+                  // Call signup API
+                  final response = await http.post(
+                    Uri.parse('http://10.0.2.2:5000/api/signup'), // Update with your backend URL
+                    headers: <String, String>{
+                      'Content-Type': 'application/json; charset=UTF-8',
+                    },
+                    body: jsonEncode(<String, dynamic>{
+                      'name': name,  // Use user input
+                      'email': email,  // Use user input
+                      'password': password,  // Use user input
+                      'gender': _selectedGender,  // Use selected gender
+                    }),
+                  );
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Join us and get started!',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-      ],
-    );
-  }
-}
-
-class AuthButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onPressed;
-
-  const AuthButton({super.key, required this.text, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      child: Text(text),
-      style: ElevatedButton.styleFrom(
-        minimumSize: const Size(150, 50), // Adjust button size
-      ),
-    );
-  }
-}
-
-class AuthTextButton extends StatelessWidget {
-  final String text;
-  final VoidCallback onPressed;
-
-  const AuthTextButton({super.key, required this.text, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: onPressed,
-      child: Text(text),
-    );
-  }
-}
-
-class SocialIconsRow extends StatelessWidget {
-  const SocialIconsRow({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SocialIcon(assetPath: 'images/google.png'),
-        SizedBox(width: 16),
-        SocialIcon(assetPath: 'images/facebook.png'),
-        SizedBox(width: 16),
-        SocialIcon(assetPath: 'images/apple.png'),
-      ],
-    );
-  }
-}
-
-class SocialIcon extends StatelessWidget {
-  final String assetPath;
-
-  const SocialIcon({super.key, required this.assetPath});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 60, // Make the container square
-      height: 60,
-      decoration: BoxDecoration(
-        color: Colors.white, // White background
-        borderRadius: BorderRadius.circular(8), // Optional: rounded corners
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3), // Shadow effect
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10), // Add padding to center the image
-        child: Image.asset(assetPath, height: 40),
-      ),
-    );
-  }
-}
-
-class TextInput extends StatelessWidget {
-  final String text;
-
-  const TextInput({super.key, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0), // Add padding
-      child: SizedBox(
-        width: 300, // Adjust width of the text field
-        child: TextField(
-          style: const TextStyle(color: Colors.black), // Set text color to black
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12), // Left padding
-            hintText: text, // Placeholder
-            hintStyle: const TextStyle(color: Colors.grey), // Hint text color
-            filled: true,
-            fillColor: const Color(0xFFF1F4FF), // Use correct background color in decoration
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: BorderSide.none,
-            ),
+                  if (response.statusCode == 201) {
+                    // Handle successful signup
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Signup successful!')),
+                    );
+                  } else {
+                    // Handle signup error
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Signup failed!')),
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              // Navigation to login page
+              AuthTextButton(
+                text: 'Already have an account?',
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const LoginPage(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              const SocialIconsRow(),
+            ],
           ),
         ),
       ),
