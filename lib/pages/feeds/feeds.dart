@@ -5,8 +5,16 @@ class FeedsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Text('Hello feeds'),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Welcome'),
+      ),
+      body: Center(
+        child: const Text(
+          'Welcome to the Feeds Page!',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+      ),
     );
   }
 }

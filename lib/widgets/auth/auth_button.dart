@@ -10,10 +10,10 @@ class AuthButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: onPressed,
-      child:  Text(text),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
       ),
+      child:  Text(text),
     );
   }
 }
