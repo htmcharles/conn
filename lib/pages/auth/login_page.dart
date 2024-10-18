@@ -95,10 +95,10 @@ class _LoginPageState extends State<LoginPage> {
                     const SnackBar(content: Text('Login successful!')),
                   );
 
-                  // Navigate to the Feeds page
+                  // Navigate to the Feeds page with the email
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (context) => const FeedsPage(), // Navigate to Feeds page
+                      builder: (context) => FeedsPage(email: email), // Pass the email here
                     ),
                   );
                 } else {

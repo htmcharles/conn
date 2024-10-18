@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.dark, // Start with dark theme
       debugShowCheckedModeBanner: false,
-      home: const Scaffold(
+      home: Scaffold(
         body: LoginPage(),
       ),
     );
